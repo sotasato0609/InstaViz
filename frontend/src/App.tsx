@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
+import GrowthPage from './pages/GrowthPage';
+import PostsPage from './pages/PostsPage';
 import RouteGuard from './components/RouteGuard';
 
 /**
@@ -18,6 +20,22 @@ const App = () => {
             element={
               <RouteGuard>
                 <DashboardPage />
+              </RouteGuard>
+            }
+          />
+          <Route
+            path="/growth"
+            element={
+              <RouteGuard>
+                <GrowthPage />
+              </RouteGuard>
+            }
+          />
+          <Route
+            path="/posts"
+            element={
+              <RouteGuard>
+                <PostsPage />
               </RouteGuard>
             }
           />

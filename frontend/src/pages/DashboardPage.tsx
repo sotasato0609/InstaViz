@@ -1,74 +1,53 @@
-import { useNavigate } from 'react-router-dom';
-import { useAuthContext } from '../hooks/useAuthContext';
+import { useState } from 'react';
+import Layout from '../components/Layout';
+import KpiCard from '../components/KpiCard';
+import PeriodSelector from '../components/PeriodSelector';
+import MetricsChart from '../components/charts/MetricsChart';
+import FollowerGrowthChart from '../components/charts/FollowerGrowthChart';
+import { mockKpiByPeriod, mockDailyMetrics } from '../mocks/data';
+import type { Period } from '../types';
 
 /**
- * ダッシュボードページ（プレースホルダー）
- * P1で本格実装予定
+ * ダッシュボードページ
+ * KPIカード6枚 + 日次指標グラフ + フォロワー推移
  */
 const DashboardPage = () => {
-  const { authUser, firebaseUser, logout } = useAuthContext();
-  const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    await logout();
-    navigate('/login');
-  };
+  const [period, setPeriod] = useState<Period>('30d');
+  const kpi = mockKpiByPeriod[period];
+  const metrics = mockDailyMetrics[period];
 
   return (
-    <div className="min-h-screen bg-[#F5F6F9]">
-      {/* ヘッダー */}
-      <header className="bg-white border-b border-[#DDE1EC] px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-[#1B2860]">
-            Insta<span className="text-[#CC0022]">Viz</span>
-          </h1>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-[#6B7080]">
-              {authUser?.email || firebaseUser?.email}
-            </span>
-            {authUser?.role === 'admin' && (
-              <span className="text-xs bg-[#1B2860] text-white px-2 py-0.5 rounded">
-                Admin
-              </span>
-            )}
-            <button
-              onClick={handleLogout}
-              className="text-sm text-[#CC0022] hover:underline"
-            >
-              ログアウト
-            </button>
-          </div>
-        </div>
-      </header>
+    <Layout title="ダッシュボード">
+      {/* 期間セレクター */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+        <p className="text-sm text-[#6B7080]">
+          選択期間のパフォーマンス概要
+        </p>
+        <PeriodSelector selected={period} onChange={setPeriod} />
+      </div>
 
-      {/* メインコンテンツ */}
-      <main className="max-w-7xl mx-auto px-6 py-8">
-        <div className="bg-white rounded-lg border border-[#DDE1EC] p-8 text-center">
-          <h2 className="text-2xl font-bold text-[#1B2860] mb-4">
-            ダッシュボード
-          </h2>
-          <p className="text-[#6B7080] mb-2">
-            ログイン成功！🎉
-          </p>
-          <p className="text-[#6B7080] mb-4">
-            ダッシュボードの本格実装はP1フェーズで行います。
-          </p>
-          {authUser && (
-            <div className="mt-4 p-4 bg-[#F5F6F9] rounded-lg text-left inline-block">
-              <p className="text-sm text-[#6B7080]">
-                <strong>UID:</strong> {authUser.uid}
-              </p>
-              <p className="text-sm text-[#6B7080]">
-                <strong>Email:</strong> {authUser.email}
-              </p>
-              <p className="text-sm text-[#6B7080]">
-                <strong>Role:</strong> {authUser.role}
-              </p>
-            </div>
-          )}
-        </div>
-      </main>
-    </div>
+      {/* KPIカード */}
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 mb-6">
+        <KpiCard label="フォロワー" value={kpi.followers} icon="followers" />
+        <KpiCard label="リーチ" value={kpi.reach} icon="reach" />
+        <KpiCard label="インプレッション" value={kpi.impressions} icon="impressions" />
+        <KpiCard label="プロフィール閲覧" value={kpi.profileViews} icon="profileViews" />
+        <KpiCard label="HP遷移" value={kpi.hpClicks} icon="hpClicks" />
+        <KpiCard label="エンゲージメント率" value={kpi.engagementRate} format="percent" icon="engagementRate" />
+      </div>
+
+      {/* グラフエリア */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+        <MetricsChart
+          data={metrics}
+          metrics={['reach', 'impressions']}
+        />
+        <FollowerGrowthChart
+          data={metrics}
+          height={320}
+        />
+      </div>
+    </Layout>
   );
 };
 

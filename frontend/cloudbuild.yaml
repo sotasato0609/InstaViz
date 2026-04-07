@@ -5,7 +5,7 @@ steps:
       - '-f'
       - 'Dockerfile.prod'
       - '--build-arg'
-      - 'VITE_API_BASE_URL=https://instaviz-backend-394992534886.asia-northeast1.run.app'
+      - 'VITE_API_BASE_URL=https://instaviz-backend-v2kw6uhafa-an.a.run.app'
       - '--build-arg'
       - 'VITE_FIREBASE_API_KEY=AIzaSyBYRZGFb2Sa5Oa3yvx1EEUIjI4InthEA_c'
       - '--build-arg'
