@@ -1,18 +1,16 @@
-import { signOut } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
-import { auth } from '../config/firebase';
-import { useAuth } from '../hooks/useAuth';
+import { useAuthContext } from '../hooks/useAuthContext';
 
 /**
  * ダッシュボードページ（プレースホルダー）
  * P1で本格実装予定
  */
 const DashboardPage = () => {
-  const { user } = useAuth();
+  const { authUser, firebaseUser, logout } = useAuthContext();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    await signOut(auth);
+    await logout();
     navigate('/login');
   };
 
@@ -25,7 +23,14 @@ const DashboardPage = () => {
             Insta<span className="text-[#CC0022]">Viz</span>
           </h1>
           <div className="flex items-center gap-4">
-            <span className="text-sm text-[#6B7080]">{user?.email}</span>
+            <span className="text-sm text-[#6B7080]">
+              {authUser?.email || firebaseUser?.email}
+            </span>
+            {authUser?.role === 'admin' && (
+              <span className="text-xs bg-[#1B2860] text-white px-2 py-0.5 rounded">
+                Admin
+              </span>
+            )}
             <button
               onClick={handleLogout}
               className="text-sm text-[#CC0022] hover:underline"
@@ -45,9 +50,22 @@ const DashboardPage = () => {
           <p className="text-[#6B7080] mb-2">
             ログイン成功！🎉
           </p>
-          <p className="text-[#6B7080]">
+          <p className="text-[#6B7080] mb-4">
             ダッシュボードの本格実装はP1フェーズで行います。
           </p>
+          {authUser && (
+            <div className="mt-4 p-4 bg-[#F5F6F9] rounded-lg text-left inline-block">
+              <p className="text-sm text-[#6B7080]">
+                <strong>UID:</strong> {authUser.uid}
+              </p>
+              <p className="text-sm text-[#6B7080]">
+                <strong>Email:</strong> {authUser.email}
+              </p>
+              <p className="text-sm text-[#6B7080]">
+                <strong>Role:</strong> {authUser.role}
+              </p>
+            </div>
+          )}
         </div>
       </main>
     </div>

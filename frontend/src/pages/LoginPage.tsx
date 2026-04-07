@@ -1,23 +1,43 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import {
   signInWithPopup,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
 } from 'firebase/auth';
 import { auth, googleProvider } from '../config/firebase';
+import { useAuthContext } from '../hooks/useAuthContext';
 
 /**
  * ログインページ
  * Google OAuth + メール/パスワード認証
+ * ログイン済みの場合は /dashboard にリダイレクト
  */
 const LoginPage = () => {
   const navigate = useNavigate();
+  const { firebaseUser, loading: authLoading, verifyToken } = useAuthContext();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // 認証状態の読み込み中
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F5F6F9]">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-[#CC0022] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-[#6B7080]">読み込み中...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // ログイン済みユーザーはダッシュボードにリダイレクト
+  if (firebaseUser) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   // Googleログイン
   const handleGoogleLogin = async () => {
@@ -25,6 +45,8 @@ const LoginPage = () => {
     setLoading(true);
     try {
       await signInWithPopup(auth, googleProvider);
+      // バックエンドでトークン検証 → DBにユーザー登録/role取得
+      await verifyToken();
       navigate('/dashboard');
     } catch {
       setError('Googleログインに失敗しました。もう一度お試しください。');
@@ -45,6 +67,8 @@ const LoginPage = () => {
       } else {
         await signInWithEmailAndPassword(auth, email, password);
       }
+      // バックエンドでトークン検証 → DBにユーザー登録/role取得
+      await verifyToken();
       navigate('/dashboard');
     } catch (err: unknown) {
       if (err instanceof Error) {

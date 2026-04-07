@@ -1,16 +1,19 @@
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+import { useAuthContext } from '../hooks/useAuthContext';
 
 interface RouteGuardProps {
   children: React.ReactNode;
+  /** admin専用ルートの場合はtrueを指定 */
+  requireAdmin?: boolean;
 }
 
 /**
  * 認証ガードコンポーネント
  * 未ログイン時は /login へリダイレクト
+ * requireAdmin=true の場合、admin以外は /dashboard へリダイレクト
  */
-const RouteGuard = ({ children }: RouteGuardProps) => {
-  const { user, loading } = useAuth();
+const RouteGuard = ({ children, requireAdmin = false }: RouteGuardProps) => {
+  const { firebaseUser, authUser, loading } = useAuthContext();
 
   if (loading) {
     return (
@@ -23,8 +26,13 @@ const RouteGuard = ({ children }: RouteGuardProps) => {
     );
   }
 
-  if (!user) {
+  if (!firebaseUser) {
     return <Navigate to="/login" replace />;
+  }
+
+  // admin専用ルートの権限チェック
+  if (requireAdmin && authUser?.role !== 'admin') {
+    return <Navigate to="/dashboard" replace />;
   }
 
   return <>{children}</>;
