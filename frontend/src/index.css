@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+/* カスタムCSS変数 */
+:root {
+  --color-primary: #CC0022;
+  --color-navy: #1B2860;
+  --color-bg: #F5F6F9;
+  --color-border: #DDE1EC;
+  --color-text: #111111;
+  --color-muted: #6B7080;
+}
+
+body {
+  margin: 0;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
