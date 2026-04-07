@@ -10,8 +10,14 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 
 // ミドルウェア
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://frontend:5173',
+  ...(process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : []),
+];
+
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://frontend:5173'],
+  origin: allowedOrigins,
   credentials: true,
 }));
 app.use(express.json());
@@ -32,16 +38,15 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
 // サーバー起動
 const startServer = async (): Promise<void> => {
   try {
-    // DB接続テスト
+    // DB接続テスト（失敗してもサーバーは起動する）
     await testConnection();
-
-    app.listen(PORT, () => {
-      logger.info(`InstaViz API サーバー起動: ポート ${PORT}`);
-    });
   } catch (error) {
-    logger.error('サーバー起動に失敗しました', { error });
-    process.exit(1);
+    logger.warn('DB接続に失敗しました。DB機能は制限されます。', { error });
   }
+
+  app.listen(PORT, () => {
+    logger.info(`InstaViz API サーバー起動: ポート ${PORT}`);
+  });
 };
 
 startServer();

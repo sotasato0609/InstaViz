@@ -9,26 +9,25 @@ const router = Router();
  * ヘルスチェックエンドポイント
  */
 router.get('/', async (_req: Request, res: Response): Promise<void> => {
+  let dbStatus = 'disconnected';
+
   try {
-    // DB接続チェック
     const connection = await pool.getConnection();
     connection.release();
-
-    res.json({
-      success: true,
-      data: {
-        status: 'ok',
-        timestamp: new Date().toISOString(),
-        uptime: process.uptime(),
-      },
-    });
-  } catch (error) {
-    logger.error('ヘルスチェック失敗', { error });
-    res.status(503).json({
-      success: false,
-      error: 'サービスが利用できません',
-    });
+    dbStatus = 'connected';
+  } catch {
+    logger.warn('ヘルスチェック: DB接続なし');
   }
+
+  res.json({
+    success: true,
+    data: {
+      status: 'ok',
+      database: dbStatus,
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+    },
+  });
 });
 
 export default router;
